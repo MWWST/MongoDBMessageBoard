@@ -1,0 +1,131 @@
+<html>
+<head>
+<title></title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type ="text/javascript" src="/socket.io/socket.io.js"></script>
+   
+    <!-- <link rel="stylesheet" type="text/css" href"/stylesheets/style.css"> -->
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+<!-- <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous"> -->
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<!-- <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous"> -->
+
+<!-- Latest compiled and minified JavaScript -->
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<!-- <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script> -->
+
+<!-- <script src="./node_modules/jquery/dist/jquery/jquery.min.js"></script> -->
+    <title>Job Dashboard</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <h1 style="text-align:center;">Posts and Comments</h1>
+                <%if (typeof(errors)!='undefined') {%>
+                 <% for (var z in errors) { %>
+                  <h3><%= errors[z].message %></h3>
+                 <% } %> <% } %>
+           
+            <div class="col-sm-12">
+              
+                <div style="margin-top:5px;" class="well">
+
+                    <form method="post" action="/posts/new">
+                          <div class="form-group">
+                        <label>Name</label>
+                        <input style="width:30%;"type="text" id="name" length="20" name="name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="post" name="post" class="form-control"></textarea><br><br>
+                    </div>
+                        <button type="submit" class="btn btn-success ">Post Message</button>
+                    </form>
+
+                </div>
+                <div class="col-sm-9 col-sm-offset-2">
+                    <% for (x in allposts){%>
+                   
+                       <h3>Name: <%=allposts[x].name%></h3>
+                       <h2>Message: <%=allposts[x].text%></h2>
+                      
+                       <h4>Comments:</h4>
+                       <% for(y in comments) {%>
+                            <%if (comments[y]._post == allposts[x].id) {%>
+                                <li><%=comments[y].text%></li>
+                    <form id="deleteComment" action="/comments/destroy" method="POST">
+                        <input type="hidden" name="postid" value="<%=allposts[x].id%>">
+                        <input type="hidden" name="id" value="<%=comments[y].id%>">
+                        <button type="submit" class="btn btn-xs btn-danger">Delete Comment</button>
+                      </form>
+                            <%}%>
+                        <%}%>
+                   
+                
+
+
+
+                           
+                       <form id="commentsForm" method="POST" action="/comments/new">
+                        <div style="margin-top:5px;" class="well">
+
+                    
+                          <div class="form-group">
+                        <label>Name</label>
+                        <input style="width:30%;"type="text" id="name" length="20" name="name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                        <label>Comment</label>
+                        <textarea id="post" name="comment" class="form-control"></textarea><br><br>
+                        <input type="hidden" name="id" value="<%=allposts[x].id%>">
+
+                    </div>
+                        <button type="submit" class="btn btn-success ">Post Comment</button>
+                    </form>
+ </div>
+                <hr>
+                 <%}%>
+                     
+                </div>
+            
+            <div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+var socket = io.connect();
+$('.liked').click(function(event){
+    event.preventDefault();
+    console.log($ (this).data('id'));
+    var id = {id : $( this ).data('id')};
+    console.log("got id",id);
+    // $.ajax({
+    //  type: 'POST',
+    //  url: 'like',
+    //  data: id,
+    //  success: function(response){
+    //      console.log(response);
+    //  }
+
+    // })
+
+    socket.emit("new_like",id)
+})
+
+socket.on("like_update",function(data){
+    console.log('got like update',data);
+    $('#'+data.update.id).html(data.update.newcount+'&nbsp');
+ })
+})
+</script>
+</html>
